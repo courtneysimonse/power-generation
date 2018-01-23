@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Power Generation in the US</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: whitesmoke;
+            font-family: Lato, sans-serif;
+            color: #0D0000;
+        }
+        header {
+            padding: 6px 10%;
+        }
+        h1 {
+            display: inline-block;
+            margin-right: 20px;
+            color: #001323;
+        }
+        h2 {
+            display: inline-block;
+            color: #001323;
+        }
+        #map {
+            width: 80%;
+            height: 540px;
+            margin: 10px auto;
+        }
+        footer {
+            padding: 6px 10%;
+            width: 80%;
+        }
+        p {
+            font-size: 1em;
+            color: #001323;
+        }
+        .leaflet-popup-content p {
+            font-family: Lato, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Power Generation in the United States</h1>
+        <h2>Coal and Natural Gas</h2>
+    </header>
+
+    <div id='map'></div>
+
+    <footer>
+        <p>Map authored by Courtney Simonse</p>
+        <p>Data from the U.S. Energy Information Administration's <a href="http://www.eia.gov/electricity/data/eia923/" target="_blank">Form EIA-923</a>.</p>
+    </footer>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+    <script src="data/power-plants.js"></script>
+    <script>
+
+      var map = L.map('map', {
+          center: [36,-94],
+          zoom: 4,
+      });
+
+      var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+      });
+
+      tiles.addTo(map);
+
+      // sort data from largest capacity_mw to smallest
+      plants.features.sort(function(a, b) {
+        return b.properties.capacity_mw - a.properties.capacity_mw;
+      });
+
+      // L.geoJson(plants, {
+      //     pointToLayer: function(feature,latlng) {
+      //         return L.circleMarker(latlng, {
+      //            // color: 'orange',
+      //            //weight: 1,
+      //            weight: 0,
+      //            // fillColor: 'yellow',
+      //            // fillOpacity: 1,
+      //            fillOpacity: .8, // reduce opacity to make overlapping symbols more legible
+      //            // radius: 2
+      //            // radius: feature.properties.capacity_mw  // the whole map turns yellow!
+      //            // radius: feature.properties.capacity_mw * .01
+      //            radius: getRadius(feature.properties.capacity_mw)
+      //         });
+      //     },
+      //     onEachFeature : function(feature,layer) {
+      //       // console.log(feature.properties.plant_name);
+      //       // console.log(layer);
+      //       // layer.on('mouseover', function() {
+      //       //   layer.setStyle({
+      //       //     fillColor: 'red'
+      //       //   });
+      //       //   // name of power plant in tooltip
+      //       //   layer.bindTooltip(layer.feature.properties.plant_name);
+      //       // });
+      //       // layer.on('mouseout', function() {
+      //       //   layer.setStyle({
+      //       //     fillColor: 'yellow'
+      //       //   });
+      //       // });
+      //       // set different colors for coal and hydro plants and radius based on that fuel type
+      //       if (feature.properties.fuel_source.Coal) {
+      //         layer.setStyle({
+      //           fillColor: 'red',
+      //           radius: getRadius(feature.properties.fuel_source.Coal)
+      //         });
+      //       } else if (feature.properties.fuel_source.Hydro) {
+      //           layer.setStyle({
+      //             fillColor: 'blue',
+      //             radius: getRadius(feature.properties.fuel_source.Hydo)
+      //           });
+      //       }
+      //     },
+      //     filter: function(feature) {
+      //
+      //         if (feature.properties.fuel_source.Hydro ||
+      //             feature.properties.fuel_source.Coal) {
+      //             return feature;
+      //         }
+      //     }
+      // }).addTo(map);
+
+      // // adding hydro and wind sources as two separate layers
+      // var commonStyles = {
+      //         weight: 1,
+      //         stroke: 1,
+      //         fillOpacity: .8
+      // }
+      //
+      // var hydroLayer = L.geoJson(plants, {
+      //     pointToLayer: function(feature,latlng) {
+      //         return L.circleMarker(latlng, commonStyles);
+      //     },
+      //     filter: function(feature) {
+      //         if(feature.properties.fuel_source.Hydro) {
+      //             return feature;
+      //         }
+      //     },
+      //     style: function(feature) {
+      //         return {
+      //             color: '#1f78b4',
+      //             fillColor: '#1f78b4',
+      //             radius: getRadius(feature.properties.fuel_source.Hydro)
+      //         }
+      //     }
+      // }).addTo(map);
+      //
+      // var windLayer = L.geoJson(plants, {
+      //     pointToLayer: function(feature,latlng) {
+      //         return L.circleMarker(latlng, commonStyles);
+      //     },
+      //     filter: function(feature) {
+      //         if(feature.properties.fuel_source.Wind) {
+      //             return feature;
+      //         }
+      //     },
+      //     style: function(feature) {
+      //         return {
+      //             color: '#a6cee3',
+      //             fillColor: '#a6cee3',
+      //             radius: getRadius(feature.properties.fuel_source.Wind)
+      //         }
+      //     }
+      // }).addTo(map);
+      //
+      // var solarLayer = L.geoJson(plants, {
+      //     pointToLayer: function(feature,latlng) {
+      //         return L.circleMarker(latlng, commonStyles);
+      //     },
+      //     filter: function(feature) {
+      //         if(feature.properties.fuel_source.Solar) {
+      //             return feature;
+      //         }
+      //     },
+      //     style: function(feature) {
+      //         return {
+      //             color: '#fffd86',
+      //             fillColor: '#fffd86',
+      //             radius: getRadius(feature.properties.fuel_source.Solar)
+      //         }
+      //     }
+      // }).addTo(map);
+
+      // Lab assignment
+      var commonStyles = {
+              weight: 1,
+              stroke: 1,
+              fillOpacity: .5
+      }
+
+      L.geoJson(plants, {
+          pointToLayer: function(feature,latlng) {
+              return L.circleMarker(latlng, commonStyles);
+          },
+          onEachFeature : function(feature,layer) {
+            // mouseover gives a maroon color highlight
+            layer.on('mouseover', function() {
+              layer.setStyle({
+                fillColor: '#b24934'
+              });
+            });
+
+            // build popup with name and total capacity
+            var plantInfo = "<p><b>" + layer.feature.properties.plant_name + "</b>"
+                  + "<br>" + layer.feature.properties.capacity_mw + " MW";
+
+            // set different colors for coal and natural gas plants and radius based on that fuel type
+            if (feature.properties.fuel_source.Coal) {
+              layer.setStyle({
+                color: '#f67c15',
+                fillColor: '#f67c15',
+                radius: getRadius(feature.properties.fuel_source.Coal)
+              });
+              // return to color for type on mouseout
+              layer.on('mouseout', function() {
+                layer.setStyle({
+                  fillColor: '#f67c15'
+                });
+              });
+              // add fuel source data
+              plantInfo += "<br><b>" + "Coal: </b>" + layer.feature.properties.fuel_source.Coal + " MW";
+            }
+            if (feature.properties.fuel_source["Natural Gas"]) {
+                layer.setStyle({
+                  color: '#fffd86',
+                  fillColor: '#fffd86',
+                  radius: getRadius(feature.properties.fuel_source["Natural Gas"])
+                });
+                // return to color for type on mouseout
+                layer.on('mouseout', function() {
+                  layer.setStyle({
+                    fillColor: '#fffd86'
+                  });
+                });
+                // add fuel source data
+                plantInfo += "<br><b>" + "Natural Gas: </b>" + layer.feature.properties.fuel_source["Natural Gas"] + " MW";
+              }
+              plantInfo += "</p>";
+              // add popup to marker
+              layer.bindPopup(plantInfo);
+            },
+          // filter coal and natural gas plants
+          filter: function(feature) {
+
+              if (feature.properties.fuel_source.Coal ||
+                  feature.properties.fuel_source["Natural Gas"]) {
+                  return feature;
+              }
+          }
+      }).addTo(map);
+
+      // calculate radius based on area
+      function getRadius(area) {
+        var radius = Math.sqrt(area/Math.PI);
+        return radius * .6;
+      }
+
+    </script>
+
+</body>
+
+</html>
